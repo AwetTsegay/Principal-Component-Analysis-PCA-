@@ -1,0 +1,87 @@
+---
+title: "Principal Component Analysis (PCA)"
+output: html_document
+---
+
+**Suppose the matrix X is already given in R, then you can compute the scatter matrix (S) simply by:**
+
+$$S = X'X$$
+
+```{r}
+X <- matrix(c(1,-3,1,-3,-1,2,1,2,3), ncol=3, byrow = TRUE)
+X
+```
+
+```{r}
+S <- t(X) %*% X
+S
+```
+
+**If you want to compute the eigenvectors and eigenvalues of the matrix**
+
+```{r}
+M <- matrix(c(1,-3,1,-3,-1,2,1,2,3) , ncol=3, byrow = TRUE)
+M
+```
+
+```{r}
+eigen_of_M <- eigen(M)
+eigen_of_M
+```
+
+**Now, we enter the dataset into R, and use prcomp() to carry out PCA.**
+
+- We first do centering but not normalization.
+
+```{r}
+Y <- matrix(c(-3, 2.2, 4, 1.1, -5.8, -2, 1.9, 3, 1.2, -4.1,
+               0, 2.1, 1, 1.2, 0, 1, 1.7, 0, 1.2, 2.1,
+               2, 1.8, -1, 1.2, 3.7, 4, 2.3, -3, 0, 7.9,
+               6, 2.2, -5, 1.2, 12.3), ncol=5, byrow = TRUE)
+Y
+```
+
+```{r}
+pca.noscale <- prcomp(Y,center = TRUE)
+pca.noscale
+```
+
+**Next, we do both centering and normalization.**
+
+- scale = TRUE => do centering and do normalization
+
+```{r}
+pca.scale <- prcomp(Y, scale = TRUE)
+pca.scale
+```
+
+#### Quiz
+
+For this question, you may use R or Python. Your answer must be accurate to at least 4 decimal places.
+
+What is the sum of all eigenvalues of 
+
+```{r}
+q <- matrix(c(13.3, -6.4, 1.8, -17.6, -6.4, -7.7, 1.8, -10.1, 1.8,
+              1.8, -4.4, 27.9, -17.6, 10.1, 27.9, 5.2), 
+            ncol=4, byrow = TRUE)
+q
+```
+
+
+```{r}
+eigen_of_q <- eigen(q)
+eigen_of_q
+```
+
+
+```{r}
+eigen_of_q$values
+35.333241+-30.169024 + 10.375158 + -9.139374
+sum(eigen_of_q$values)
+```
+
+
+----
+
+----
