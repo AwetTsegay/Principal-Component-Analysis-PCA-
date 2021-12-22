@@ -1,0 +1,165 @@
+---
+title: "lab PCA"
+output: html_document
+---
+
+The topic that are covered in this lab worksheet is:
+
+- Principal Component Analysis (PCA)
+- Dimension Reduction
+
+#### 1. Principal Component Analysis (PCA)
+
+Recall that one primary purpose for performing PCA is dimension reduction.
+
+Today we will work with the `USArrests` dataset. 
+
+```{r}
+nrow(USArrests)
+ncol(USArrests)
+dim(USArrests)
+names(USArrests)
+```
+
+There are 50 observations (which correspond to the 50 states in US), and each observation is of dimension 4.
+
+The built-in function `prcomp()` is used for performing PCA.
+
+Recall that pre-processing of the dataset is needed. First, we do centering but no normalization.
+
+center=TRUE ==> means do centering but no normalization.
+
+```{r}
+USArr.noscale <- prcomp(USArrests, center=TRUE)
+USArr.noscale
+```
+
+**The first principal component (PC)** is dominated by Assault with weight more than 0.995, while the other three are less than 0.08. 
+
+But this happens not because Assault is not correlated with the other two crimes and UrbanPop (which means the percentage of urban population), but because the values of Assault are signficantly larger than the values of the other three attributes, so the result of PCA is over-dominated by Assault. 
+
+Use the code snippet below to see the ranges of number of different attributes.
+
+
+```{r}
+range(USArrests[,"Murder"])
+range(USArrests[,"Assault"])
+range(USArrests[,"UrbanPop"])
+range(USArrests[,"Rape"])
+```
+
+In this case, normalization is necessary, as is done below.
+
+scale=TRUE ==> means do both centering and normalization.
+
+```{r}
+USArr.scale <- prcomp(USArrests, scale=TRUE)
+USArr.scale
+```
+
+After performing PCA with normalization, we look at the first PC. Assault is positively correlated with all the other two crimes, which is expected. Assault is also positively correlated with the percentage of urban population.
+
+It is worth noting that the standard deviation of the first PC are not much larger than that of the second PC, so we also need to consider the second PC. This is quite common with real-world datasets, as the relationship between different attributes are often not clear-cut.
+
+#### 2. Dimension Reduction
+
+Before going into **dimension reduction**, we briefly discuss how R handles the expressions like (a matrix + a vector) and (a matrix * a vector). Understanding this is crucial for the rest of this section.
+
+This is best illuminated by examples.
+
+```{r}
+A <- matrix(c(1,2,3,4,5,6) , ncol=3, byrow = TRUE)
+A
+```
+
+```{r}
+A + c(7,11)
+```
+
+```{r}
+A + c(7,11,3)
+```
+
+```{r}
+A + c(7,11,3,13)
+```
+
+To understand why the outputs are as above, you may first hypothetically think the matrix A is treated as a vector c(1,4,2,5,3,6) in R (go down the first column, then go down the second column, and so on).
+
+In A+v for any vector v, what R has done is to add to each entry of the hypothetical vector of A by the entry of v in a cyclic manner.
+
+Analogous outputs are obtained when you replace addition by multiplication (or subtraction or division). Experiment yourself.
+
+**Now we come back to PCA.**
+
+Recall that one primary purpose for performing PCA is dimension reduction. `prcomp` has already done this for you. 
+
+You can retrieve the result as below.
+
+```{r}
+USArr.scale$center
+USArr.scale$scale
+USArr.scale$x
+```
+
+To interpret the above tables, recall that in some code snippet before, prcomp has computed the first, second, third and fourth PCs for us. 
+
+Let’s denote the PCs by u1, u2, u3, u4. Then the original observation of Alabama can be recovered as follows. First, compute −0.97566045u1 + 1.12200121u2 − 0.43980366u3 + 0.154696581u4 as below.
+
+```{r}
+t(USArr.scale$rotation %*% USArr.scale$x["Alabama",])
+```
+
+Recall that we had done normalization. Thus, to recover the original observation, we need to scale back, as below.
+
+```{r}
+q <- t(USArr.scale$rotation %*% USArr.scale$x["Alabama",])
+q <- USArr.scale$scale * q
+q
+```
+
+Recall that we had done centering. Thus, the final step to recover the original observation is to add the center, as below.
+
+```{r}
+q <- q + USArr.scale$center
+q
+USArrests["Alabama",]
+```
+
+What if we want to represent all the observations approximately by just using the first two PCs? 
+
+We can use the following short code snippet. This is the reason why we discuss (a matrix + a vector) and (a matrix * a vector) in the beginning of this section.
+
+```{r}
+q <- USArr.scale$rotation[,1:2] %*% t( USArr.scale$x[,1:2] )
+q <- q * USArr.scale$scale
+q <- q + USArr.scale$center
+t(q)
+```
+
+By eyeballing the data, you see the approximations t(q) are quite well, although a few entries in the approximation deviate from the actual value by quite a bit, e.g. the number of Assault cases in Arizona is actually 294, but the approximation is 244.02163.
+
+This is unavoidable in real-world data, for which ignoring several PCs will cause large errors on some observations.
+
+We try again by using the first three PCs.
+
+```{r}
+q <- USArr.scale$rotation[,1:3] %*% t( USArr.scale$x[,1:3] )
+q <- q * USArr.scale$scale
+q <- q + USArr.scale$center
+t(q)
+```
+
+Let’s compute the absolute errors and the relative errors (as percentage).
+
+```{r}
+t(q) - USArrests
+```
+
+```{r}
+((t(q) - USArrests) / USArrests) * 100
+```
+
+----
+
+----
