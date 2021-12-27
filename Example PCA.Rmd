@@ -1,0 +1,64 @@
+---
+title: "Revision 7"
+output: html_document
+---
+
+### Example PCA
+
+#### Question 5.
+
+```{r}
+# We create the points in R
+x1 <- c(1, 7)
+x2 <- c(4, 2)
+x3 <- c(3, 8.5)
+x4 <- c(6.6, 9)
+x5 <- c(1, 9.5)
+x6 <- c(4, 7)
+
+d <- rbind(x1, x2, x3, x4, x5, x6) # a, b and c are combined per row
+colnames(d) <- c("x", "y") # rename columns
+
+d # display the points
+```
+
+
+```{r}
+# The distance is found using the dist() function:
+d.dist <- dist(d, method = "euclidean")
+d.dist # display the distance matrix
+```
+
+
+
+```{r}
+# Agglomerative Hierarchical Clustering for single linkage
+
+ahc.s <- hclust(d.dist, method="single")
+ahc.s
+```
+
+```{r}
+# Plotting a dendrogram for single linkage
+plot(ahc.s, hang = -1, cex = 0.6)
+```
+
+
+
+```{r}
+# Agglomerative Hierarchical Clustering for single linkage
+
+ahc.c <- hclust(d.dist, method="complete")
+ahc.c
+```
+
+
+```{r}
+# Plotting a dendrogram for single linkage
+plot(ahc.c, hang = -1, cex = 0.6)
+```
+
+
+
+
+
